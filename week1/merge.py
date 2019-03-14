@@ -24,7 +24,6 @@ class Merge:
             ret, frameOut = self.outPut.read()
             frame = numpy.hstack((frameIn, frameOut))
             out_cap.write(frame)
-            cv2.waitKey(1)
 
 
 if __name__ == '__main__':
