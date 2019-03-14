@@ -73,11 +73,15 @@ self.src = cv2.imread(path)
 self.srcGray = cv2.cvtColor(self.src, cv2.COLOR_BGR2GRAY)
 ```
 
+![gray_opencv](https://github.com/HLNN/AI_open_class/blob/master/week1/pic/gray_opencv.png)
+
  - 边缘提取：使用`Canny()`函数提取边缘特征，后面的两个参数表示的是提取的时候的梯度范围。
 
 ```python
 self.srcCanny = cv2.Canny(self.src, 100, 300)
 ```
+
+![canny_opencv](https://github.com/HLNN/AI_open_class/blob/master/week1/pic/canny_opencv.png)
 
  - 图片展示：使用`imshow()`函数显示图片并延时。
 
@@ -100,6 +104,8 @@ for i in range(len(self.src)):
         self.srcGray[i][j] = 0.11 * self.src[i][j][0] + 0.59 * self.src[i][j][1] + 0.30 * self.src[i][j][2]
 ```
 
+![gray_my](https://github.com/HLNN/AI_open_class/blob/master/week1/pic/gray_my.png)
+
  - 边缘提取：使用`Canny()`函数能提取出较好的边缘特征，但实现Canny算法需要高斯模糊，计算差分得到图像的梯度信息，最后在通过两个阈值确定强制边界和延迟边界，计算较为复杂。所以仅实现`Sobel`算子，效果很差。
 
 ```python
@@ -112,6 +118,8 @@ for i in range(1, len(self.src) - 1):
              1 * self.srcGray[i + 1][j - 1] + 2 * self.srcGray[i + 1][j] + 1 * self.srcGray[i + 1][j + 1]
         self.srcCanny[i][j] = fx + fy
 ```
+
+![sobel_my](https://github.com/HLNN/AI_open_class/blob/master/week1/pic/sobel_my.png)
 
 
 **运行速度比较**
@@ -166,6 +174,8 @@ ret, frame = self.cap.read()
 
 然后再调用Canny就能得到含边界信息的图片了
 
+![camera](https://github.com/HLNN/AI_open_class/blob/master/week1/pic/camera.png)
+
 
 ### 视频处理
 
@@ -189,4 +199,12 @@ self.frameSize = (int(self.in_cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(self.in_ca
 out_cap = cv2.VideoWriter('out.mp4', self.length, self.fourcc, self.fps, self.frameSize)
 out_cap.open('out.mp4', self.fourcc, self.fps, self.frameSize)
 ```
+
+
+----------------
+
+
+#### 写在最后
+
+因为考虑到方便展示经过Canny处理前后的视频，所以写的一个简单的`merge`函数。可以使用命令行参数或者`input`输入两个视频的文件名，就可以将两个视频水平拼接成一个。目前我只试了处理两个长度和分辨率完全相同的`mp4`文件，其他情况下可能会有报错。
 
