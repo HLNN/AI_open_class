@@ -24,11 +24,12 @@ class Image:
         for i in range(1, len(self.src) - 1):
             for j in range(1, len(self.src[0]) - 1):
                 fx = -1 * self.srcGray[i - 1][j - 1] + 1 * self.srcGray[i - 1][j + 1] + \
-                     -2 * self.srcGray[i][j - 1] + 2 * self.srcGray[i][j + 1] + \
+                     -2 * self.srcGray[i][j - 1] + 1 * self.srcGray[i][j] + 2 * self.srcGray[i][j + 1] + \
                      -1 * self.srcGray[i + 1][j - 1] + 1 * self.srcGray[i + 1][j + 1]
                 fy = -1 * self.srcGray[i - 1][j - 1] + -2 * self.srcGray[i - 1][j] + -1 * self.srcGray[i - 1][j + 1] + \
+                     1 * self.srcGray[i][j] + \
                      1 * self.srcGray[i + 1][j - 1] + 2 * self.srcGray[i + 1][j] + 1 * self.srcGray[i + 1][j + 1]
-                self.srcCanny[i][j] = fx + fy
+                self.srcCanny[i][j] = (abs(fx) + abs(fy)) // 2
 
     def show(self):
         cv2.imshow("Gray", self.srcGray)
