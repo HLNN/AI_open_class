@@ -122,6 +122,77 @@ for i in range(1, len(self.src) - 1):
 ![sobel_my](https://github.com/HLNN/AI_open_class/blob/master/week1/pic/sobel_my.png)
 
 
+**2019.03.22更新**
+
+上周因为写的比较快，任务布置了之后一个下午就全部写完了，`Sobel`的这部分代码处理的结果很明显有问题，但也没有仔细查问题，一直拖到今天才会过来看
+
+首先是卷积核的问题，`Sobel`算子操作的本质就是对图像卷积，提取出图像在水平或者垂直方向上的差分信息。而卷积核就起到了加权求和的作用，所以卷积核各点的值之和应该等于1，这样才能使卷积之后的图像和处理之前亮度相同。原理的卷积核之和为零，所以图像就会变暗。
+
+另外我们用`Sobel`算子是想提取出水平和竖直方向的梯度，而具体是向左还是向右，向上还是向下我们并不关心，所以求得的水平和竖直方向的结果应该取绝对值之后叠加。
+
+修改后的代码就成了这个样子
+
+```python
+for i in range(1, len(self.src) - 1):
+    for j in range(1, len(self.src[0]) - 1):
+        fx = -1 * self.srcGray[i - 1][j - 1] + 1 * self.srcGray[i - 1][j + 1] + \
+             -2 * self.srcGray[i][j - 1] + 1 * self.srcGray[i][j] + 2 * self.srcGray[i][j + 1] + \
+             -1 * self.srcGray[i + 1][j - 1] + 1 * self.srcGray[i + 1][j + 1]
+        fy = -1 * self.srcGray[i - 1][j - 1] + -2 * self.srcGray[i - 1][j] + -1 * self.srcGray[i - 1][j + 1] + \
+             1 * self.srcGray[i][j] + \
+             1 * self.srcGray[i + 1][j - 1] + 2 * self.srcGray[i + 1][j] + 1 * self.srcGray[i + 1][j + 1]
+        self.srcCanny[i][j] = abs(fx) + abs(fy)
+```
+
+能看出来图片的亮度以及好了很多，边缘质量有所提高但又不明显
+
+![sobel_my_1](https://github.com/HLNN/AI_open_class/blob/master/week1/pic/sobel_my_1.png)
+
+
+我现在还没有做的改进就是对卷积之后的数据进行归一化，但我也不知道具体该怎么做，所以我就到`Github`上查了一下`OpenCv`的源码。找到了源码中调用`Sobel`的例子
+
+```python
+## [sobel]
+# Gradient-X
+# grad_x = cv.Scharr(gray,ddepth,1,0)
+grad_x = cv.Sobel(gray, ddepth, 1, 0, ksize=3, scale=scale, delta=delta, borderType=cv.BORDER_DEFAULT)
+
+# Gradient-Y
+# grad_y = cv.Scharr(gray,ddepth,0,1)
+grad_y = cv.Sobel(gray, ddepth, 0, 1, ksize=3, scale=scale, delta=delta, borderType=cv.BORDER_DEFAULT)
+## [sobel]
+
+## [convert]
+# converting back to uint8
+abs_grad_x = cv.convertScaleAbs(grad_x)
+abs_grad_y = cv.convertScaleAbs(grad_y)
+## [convert]
+
+## [blend]
+## Total Gradient (approximate)
+grad = cv.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0)
+## [blend]
+```
+
+源码对于归一化的处理非常简单，就是求了两个方向的平均值，那就照着试试
+
+```python
+for i in range(1, len(self.src) - 1):
+    for j in range(1, len(self.src[0]) - 1):
+        fx = -1 * self.srcGray[i - 1][j - 1] + 1 * self.srcGray[i - 1][j + 1] + \
+             -2 * self.srcGray[i][j - 1] + 1 * self.srcGray[i][j] + 2 * self.srcGray[i][j + 1] + \
+             -1 * self.srcGray[i + 1][j - 1] + 1 * self.srcGray[i + 1][j + 1]
+        fy = -1 * self.srcGray[i - 1][j - 1] + -2 * self.srcGray[i - 1][j] + -1 * self.srcGray[i - 1][j + 1] + \
+             1 * self.srcGray[i][j] + \
+             1 * self.srcGray[i + 1][j - 1] + 2 * self.srcGray[i + 1][j] + 1 * self.srcGray[i + 1][j + 1]
+        self.srcCanny[i][j] = (abs(fx) + abs(fy)) // 2
+```
+
+运行一下发现还不错，这归一化真的简单粗暴
+
+![sobel_my_2](https://github.com/HLNN/AI_open_class/blob/master/week1/pic/sobel_my_2.png)
+
+
 **运行速度比较**
 
 
