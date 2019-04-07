@@ -108,3 +108,9 @@ venv.bak/
 
 # weekly report
 report.docx
+
+# MNIST
+*/mnist
+
+# model
+*/model
