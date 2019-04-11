@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.utils.data as DATA
 import torchvision
 import os
-# import cv2
+import cv2
 
 
 class CNN(nn.Module):
@@ -40,4 +40,18 @@ class CNN(nn.Module):
 cnn = CNN()
 cnn.load_state_dict(torch.load('./model/cnn_params_gpu_100_100_0.001.pkl'))
 print(cnn)
+
+
+src = cv2.imread("5.jpg")
+src = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
+src = cv2.resize(src, (28, 28))
+thresh, src = cv2.threshold(src, 127, 255, cv2.THRESH_BINARY_INV)
+cv2.imshow("", src)
+
+test_input = torch.from_numpy(src).float()
+test_input = torch.unsqueeze(test_input, 0)
+test_input = torch.unsqueeze(test_input, 0)
+test_output = cnn(test_input)
+pred_y = torch.max(test_output, 1)[1].data.numpy().squeeze()
+print("The number in picture is ", pred_y)
 
